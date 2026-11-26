@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ENV DOTNET_SYSTEM_NET_DISABLEIPV6=1 \
+    DOTNET_CLI_TELEMETRY_OPTOUT=1 \
+    NUGET_XMLDOC_MODE=skip
+WORKDIR /src
+COPY src/PrintSvc/PrintSvc.csproj src/PrintSvc/
+RUN --mount=type=cache,id=nuget-win-x64,target=/root/.nuget/packages \
+    dotnet restore src/PrintSvc/PrintSvc.csproj -r win-x64
+COPY src/ src/
+RUN --mount=type=cache,id=nuget-win-x64,target=/root/.nuget/packages \
+    dotnet publish src/PrintSvc/PrintSvc.csproj \
+    -c Release \
+    -r win-x64 \
+    --self-contained true \
+    -p:PublishSingleFile=false \
+    -o /dist \
+    --no-restore
+
+FROM alpine:3.20 AS final
+COPY --from=build /dist /dist
+COPY scripts/export-win-dist.sh /export-win-dist.sh
+RUN sed -i 's/\r$//' /export-win-dist.sh && chmod +x /export-win-dist.sh
+ENTRYPOINT ["/export-win-dist.sh"]
