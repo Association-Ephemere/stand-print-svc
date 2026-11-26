@@ -5,7 +5,15 @@ using PrintSvc.Publisher;
 using PrintSvc.Settings;
 using PrintSvc.Storage;
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
+{
+    Args = args,
+    ContentRootPath = AppContext.BaseDirectory
+});
+builder.Services.AddWindowsService(options =>
+{
+    options.ServiceName = "PrintSvc";
+});
 builder.Services.AddHostedService<Worker>();
 builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true); // Votre fichier
 

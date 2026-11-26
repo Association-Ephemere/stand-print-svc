@@ -27,9 +27,10 @@ public sealed class PhotoDownloader(
         }
 
         string fileName = Path.GetFileName(photo.PhotoStorageKey);
-        string destinationPath = Path.Combine(_storage.TempDirectory, fileName);
+        string tempDirectory = _storage.GetResolvedTempDirectory();
+        string destinationPath = Path.Combine(tempDirectory, fileName);
 
-        Directory.CreateDirectory(_storage.TempDirectory);
+        Directory.CreateDirectory(tempDirectory);
 
         var args = new GetObjectArgs()
             .WithBucket(_storage.Bucket)

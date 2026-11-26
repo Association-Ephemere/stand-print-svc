@@ -239,7 +239,7 @@ public class Worker : BackgroundService
                 continue;
             }
 
-            string tempPath = Path.Combine(_storage.TempDirectory, Path.GetFileName(photo.PhotoStorageKey));
+            string tempPath = Path.Combine(_storage.GetResolvedTempDirectory(), Path.GetFileName(photo.PhotoStorageKey));
             try
             {
                 await SendDownloadedPhotoToPrinterAsync(photo, ct);
@@ -296,7 +296,7 @@ public class Worker : BackgroundService
     private async Task SendDownloadedPhotoToPrinterAsync(JobPhoto photo, CancellationToken ct)
     {
         string fileName = Path.GetFileName(photo.PhotoStorageKey);
-        string downloadedPhotoPath = Path.Combine(_storage.TempDirectory, fileName);
+        string downloadedPhotoPath = Path.Combine(_storage.GetResolvedTempDirectory(), fileName);
 
         _logger.LogInformation("Sending photo {FileName} to printer.", fileName);
 
